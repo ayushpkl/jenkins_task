@@ -1,22 +1,28 @@
 pipeline {
     agent any
 
+    environment {
+        PORT = '3000'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/ayushpkl/jenkins_task.git'
             }
         }
-        stage('Build Docker Image') {
+        stage('Install Dependencies') {
             steps {
-                sh 'docker build -t jenkins-task-app:latest .'
+                sh 'npm install'
             }
         }
-        stage('Run Container') {
+        stage('Start Service') {
             steps {
                 sh '''
-                    docker rm -f jenkins-task-app || true
-                    docker run -d --name jenkins-task-app -p 3000:3000 jenkins-task-app:latest
+                    pkill -f "node server.js" || true
+                    nohup node server.js >/tmp/jenkins_task.log 2>&1 &
+                    sleep 2
+                    ps aux | grep "node server.js" | grep -v grep
                 '''
             }
         }
