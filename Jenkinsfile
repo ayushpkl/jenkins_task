@@ -11,11 +11,16 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/ayushpkl/jenkins_task.git'
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
+           stage('Install Dependencies') {
+    steps {
+        sh '''
+            npm cache clean --force || true
+            rm -rf /home/userland/.npm/_cacache/tmp/*
+            npm ci || npm install
+        '''
+    }
+           }
+        
         stage('Start Service') {
             steps {
                 sh '''
